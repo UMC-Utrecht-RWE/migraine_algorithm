@@ -15,7 +15,7 @@
 
 # parameters: looking for migraine in pregnancy
 
-lookback<- -365
+my_lookback<- -365
 
 my_path<-preg_folder
 
@@ -59,6 +59,13 @@ Mig_A1<-as.data.frame(cbind(Mig_A1_ID, Mig_A1_Date))
 colnames(Mig_A1)<-c("person_id", "date")
 Mig_A1$date<-as.Date(Mig_A1$date, format = "%Y%m%d")
 
+
+#test that date of migraine signal is within lookback window
+A1_result<-lookback_test(alg_data=Mig_A1, preg_data=my_PREG, lookback=my_lookback)
+
+
+###########################################################################################################
+
 #Mig_A2: tryptan ATC: N02CC%%
 #partial string match
 
@@ -76,6 +83,11 @@ Mig_A2<-as.data.frame(cbind(unlist(Mig_A2_ID), unlist(Mig_A2_Date)))
 colnames(Mig_A2)<-c("person_id", "date")
 Mig_A2$date<-as.Date(Mig_A2$date, format = "%Y%m%d")
 
+#test that date of migraine signal is within lookback window
+A2_result<-lookback_test(alg_data=Mig_A2, preg_data=my_PREG, lookback=my_lookback)
+
+
+################################################################################
 
 #Mig_A3: migraine procedure ATC: M03AX01
 if(length(my_PROC_tables>0)){
@@ -304,8 +316,8 @@ Mig_S2<-dcast(setDT(Mig_S2), person_id ~ rowid(person_id), value.var = ("num_dat
 
 Mig_S2 <- Mig_S2[order(person_id),]
 # make sure the data is ordered by person_id
-Mig_S2$result<-NA
-#add a filter step to create my_PREG to exclude "red" and "blue"?
+
+#add a filter step to pregnancy_filter (!) create my_PREG to exclude "red" and "blue"?
 
 Mig_S2_preg<- my_PREG[my_PREG$person_id%in%Mig_S2$person_id,]
 #select necessary columns
@@ -329,11 +341,11 @@ S2_diff_end<-list()
 for(i in 2:ncol(Mig_S2_preg_end)){
   my_start_dates<-Mig_S2_preg_start[,..i]
   preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) Mig_S2[,2:ncol(Mig_S2)] - x ))
-  S2_diff_start[[i-1]]<-preg_start_mig_diff
+  S2_diff_start[[i-1]]<-as.data.frame(preg_start_mig_diff)
   
   my_end_dates<-Mig_S2_preg_end[,..i]
   preg_end_mig_diff <- as.data.frame(apply(my_end_dates,2,function(x) Mig_S2[,2:ncol(Mig_S2)] - x ))
-  S2_diff_end[[i-1]]<-preg_end_mig_diff
+  S2_diff_end[[i-1]]<-as.data.frame(preg_end_mig_diff)
 }
 
 # test the the Mig_S2 date is before preg_end and within lookback
@@ -342,20 +354,28 @@ for(i in 2:ncol(Mig_S2_preg_end)){
 #Luigi, any ideas to avoid the double loop? Thanks!
 
 S2_result<-matrix(NA, nrow(Mig_S2), (ncol(Mig_S2_preg_start)-1))
+
 for(i in 1:length(S2_diff_start)){
-  results_start<-S2_diff_start[[2]]
-  results_end<-S2_diff_end[[2]]
+  #this first loop won't take long, it's just 1:max number of pregnancies
+  results_start<-S2_diff_start[[i]]
+  results_end<-S2_diff_end[[i]]
   for (j in 1:nrow(results_start)){
-    if((any(results_end[1,]<0, na.rm = T)& any(results_start[1,]<0 & results_start[1,]>lookback,na.rm=T))==T){
+    #this loop is row by row, but only needs to be run once
+    if((any(results_end[j,]<0, na.rm = T)& any(results_start[j,]<0 & results_start[j,]>my_lookback,na.rm=T))==T){
       S2_result[j,i]<-1}else{S2_result[j,i]<-0}
   }
 }
+
+# how to speed up the row by row test? it't the "any" part that makes it complicated
+# nrow(Mig_S2[((any(results_end[1,]<0, na.rm = T)& any(results_start[1,]<0 & results_start[1,]>lookback,na.rm=T))==T),])
 
 #rows are unique persons, columns are pregnancies. If there was no second or third pregnancy, it will be 0, 
 #if the pregnancy did not have S2 Migraine exposure, it will be 0
 #the sum of this matrix is the number of pregnancies which had S2 exposure
 
 print(S2_result)
+
+################################################################################
 
 #Mig_S3: severe: N02CC01 injection PRIOR to, AND/OR DURING pregnancy 
 #AND/OR prophylaxis PRIOR but NOT DURING pregnancy 
