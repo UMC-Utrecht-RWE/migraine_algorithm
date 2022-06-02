@@ -361,7 +361,7 @@ for(i in 1:length(S2_diff_start)){
   results_end<-S2_diff_end[[i]]
   for (j in 1:nrow(results_start)){
     #this loop is row by row, but only needs to be run once
-    if((any(results_end[j,]<0, na.rm = T)& any(results_start[j,]<0 & results_start[j,]>my_lookback,na.rm=T))==T){
+    if((any(results_end[j,]<0, na.rm = T)& any(results_start[j,]>my_lookback,na.rm=T))==T){
       S2_result[j,i]<-1}else{S2_result[j,i]<-0}
   }
 }
