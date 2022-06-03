@@ -107,28 +107,31 @@ colnames(Mig_A3)<-c("person_id", "date")} else{print("No PROCEDURES table for Mi
 
 Mig_A3$date<-as.Date(Mig_A3$date, format = "%Y%m%d")
 
+A3_result<-lookback_test(alg_data=Mig_A3, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_A4: MigA1 AND/OR MigA2
 Mig_A4<-as.data.frame(inner_join(Mig_A1, Mig_A2))
-
+A4_result<-lookback_test(alg_data=Mig_A4, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_A5: MigA1 AND/OR Mig_A3
 
 
 Mig_A5<-inner_join(Mig_A1 , Mig_A3)
+A5_result<-lookback_test(alg_data=Mig_A5, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_A6: MigA2 AND/OR MigA3
 
 Mig_A6<-inner_join(Mig_A2, Mig_A3)
-
+A6_result<-lookback_test(alg_data=Mig_A6, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_A7: MigA1 AND/OR MigA2 AND/OR Mig_A3
 
 #needs 2 steps because of multiple joins
 Mig_A7<-inner_join(Mig_A1 , Mig_A2)
-#second join
-Mig_A7<-inner_join(Mig_A7, Mig_A3)
 
+  #second join
+  Mig_A7<-inner_join(Mig_A7, Mig_A3)
+  A7_result<-lookback_test(alg_data=Mig_A7, preg_data=my_PREG, lookback=my_lookback)
 
 #################################################
 #
@@ -163,6 +166,8 @@ Mig_T1<-as.data.frame(cbind(Mig_T1_ID, Mig_T1_Date))
 colnames(Mig_T1)<-c("person_id", "date")
 Mig_T1$date<-as.Date(Mig_T1$date, format = "%Y%m%d")
 
+T1_result<-lookback_test(alg_data=Mig_T1, preg_data=my_PREG, lookback=my_lookback)
+
 #Mig_T2: with aura: "G43.1", "346.0", "346.5" , "346.6", "F260"
 
 Mig_T2_codes<-c("G43.1", "346.0", "346.5" , "346.6", "F260")
@@ -184,6 +189,8 @@ Mig_T2<-as.data.frame(cbind(Mig_T2_ID, Mig_T2_Date))
 colnames(Mig_T2)<-c("person_id", "date")
 Mig_T2$date<-as.Date(Mig_T2$date, format = "%Y%m%d")
 
+T2_result<-lookback_test(alg_data=Mig_T2, preg_data=my_PREG, lookback=my_lookback)
+
 #Mig_T3: migrainosus
 
 Mig_T3_codes<-c("G43.2", "346.12", "X007R")
@@ -202,6 +209,8 @@ Mig_T3_Date<-unlist(Mig_T3_Date)
 Mig_T3<-as.data.frame(cbind(Mig_T3_ID, Mig_T3_Date))
 colnames(Mig_T3)<-c("person_id", "date")
 Mig_T3$date<-as.Date(Mig_T3$date, format = "%Y%m%d")
+
+T3_result<-lookback_test(alg_data=Mig_T3, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_T4: complicated
 # https://snomedbrowser.com/Codes/Details/193039006
@@ -223,6 +232,7 @@ Mig_T4<-as.data.frame(cbind(Mig_T4_ID, Mig_T4_Date))
 colnames(Mig_T4)<-c("person_id", "date")
 Mig_T4$date<-as.Date(Mig_T4$date, format = "%Y%m%d")
 
+T4_result<-lookback_test(alg_data=Mig_T4, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_T5: other
 
@@ -245,6 +255,8 @@ Mig_T5<-as.data.frame(cbind(Mig_T5_ID, Mig_T5_Date))
 colnames(Mig_T5)<-c("person_id", "date")
 Mig_T5$date<-as.Date(Mig_T5$date, format = "%Y%m%d")
 
+T5_result<-lookback_test(alg_data=Mig_T5, preg_data=my_PREG, lookback=my_lookback)
+
 #Mig_T6: unspecified
 
 
@@ -266,6 +278,8 @@ Mig_T6<-as.data.frame(cbind(Mig_T6_ID, Mig_T6_Date))
 
 colnames(Mig_T6)<-c("person_id", "date")
 Mig_T6$date<-as.Date(Mig_T6$date, format = "%Y%m%d")
+
+T6_result<-lookback_test(alg_data=Mig_T6, preg_data=my_PREG, lookback=my_lookback)
 
 #################################################
 #
@@ -297,6 +311,7 @@ Mig_S1$date<-as.Date(Mig_S1$date, format = "%Y%m%d")
 #inner join with Mig_A1
 Mig_S1<-inner_join(Mig_S1, Mig_A1, by="person_id")
 
+S1_result<-lookback_test(alg_data=Mig_S1, preg_data=my_PREG, lookback=my_lookback)
 
 # #Mig_S2: modify: Mig_A2 PRIOR to (within lookback), AND/OR DURING pregnancy 
 # ##question for Hedvig: at anytime prior to pregnancy (a year before? 3 months?)
@@ -309,71 +324,8 @@ Mig_S1<-inner_join(Mig_S1, Mig_A1, by="person_id")
 
 
 Mig_S2<-Mig_A2
-# convert dates to numeric
-Mig_S2$num_date<-as.numeric(Mig_A2$date)
-#long to wide
-Mig_S2<-dcast(setDT(Mig_S2), person_id ~ rowid(person_id), value.var = ("num_date"))
 
-Mig_S2 <- Mig_S2[order(person_id),]
-# make sure the data is ordered by person_id
-
-#add a filter step to pregnancy_filter (!) create my_PREG to exclude "red" and "blue"?
-
-Mig_S2_preg<- my_PREG[my_PREG$person_id%in%Mig_S2$person_id,]
-#select necessary columns
-Mig_S2_preg<-Mig_S2_preg %>% select(c(pregnancy_id,person_id, pregnancy_start_date, pregnancy_end_date ))
-# convert dates to numeric
-Mig_S2_preg$num_preg_start<- as.numeric(Mig_S2_preg$pregnancy_start_date)
-Mig_S2_preg$num_preg_end<- as.numeric(Mig_S2_preg$pregnancy_end_date)
-#long to wide
-Mig_S2_preg_start<-dcast(setDT(Mig_S2_preg), person_id ~ rowid(person_id), value.var = ("num_preg_start"))
-Mig_S2_preg_start <- Mig_S2_preg_start[order(person_id),]
-
-Mig_S2_preg_end<-dcast(setDT(Mig_S2_preg), person_id ~ rowid(person_id), value.var = ("num_preg_end"))
-Mig_S2_preg_end <- Mig_S2_preg_end[order(person_id),]
-
-
-
-# for each pregnancy w/i eachperson compare each migraine date and each pregnancy date in a vectorized way...
-S2_diff_start<-list()
-S2_diff_end<-list()
-
-for(i in 2:ncol(Mig_S2_preg_end)){
-  my_start_dates<-Mig_S2_preg_start[,..i]
-  preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) Mig_S2[,2:ncol(Mig_S2)] - x ))
-  S2_diff_start[[i-1]]<-as.data.frame(preg_start_mig_diff)
-  
-  my_end_dates<-Mig_S2_preg_end[,..i]
-  preg_end_mig_diff <- as.data.frame(apply(my_end_dates,2,function(x) Mig_S2[,2:ncol(Mig_S2)] - x ))
-  S2_diff_end[[i-1]]<-as.data.frame(preg_end_mig_diff)
-}
-
-# test the the Mig_S2 date is before preg_end and within lookback
-# store results, one row per person, one column for 1:max pregnancies
-
-#Luigi, any ideas to avoid the double loop? Thanks!
-
-S2_result<-matrix(NA, nrow(Mig_S2), (ncol(Mig_S2_preg_start)-1))
-
-for(i in 1:length(S2_diff_start)){
-  #this first loop won't take long, it's just 1:max number of pregnancies
-  results_start<-S2_diff_start[[i]]
-  results_end<-S2_diff_end[[i]]
-  for (j in 1:nrow(results_start)){
-    #this loop is row by row, but only needs to be run once
-    if((any(results_end[j,]<0, na.rm = T)& any(results_start[j,]>my_lookback,na.rm=T))==T){
-      S2_result[j,i]<-1}else{S2_result[j,i]<-0}
-  }
-}
-
-# how to speed up the row by row test? it't the "any" part that makes it complicated
-# nrow(Mig_S2[((any(results_end[1,]<0, na.rm = T)& any(results_start[1,]<0 & results_start[1,]>lookback,na.rm=T))==T),])
-
-#rows are unique persons, columns are pregnancies. If there was no second or third pregnancy, it will be 0, 
-#if the pregnancy did not have S2 Migraine exposure, it will be 0
-#the sum of this matrix is the number of pregnancies which had S2 exposure
-
-print(S2_result)
+S2_result<-lookback_or_during_test(alg_data = Mig_S2, preg_data = my_PREG, lookback = my_lookback )
 
 ################################################################################
 
@@ -395,6 +347,7 @@ for (j in 1:length(my_MED_tables)){
 Mig_S3<-as.data.frame(cbind(unlist(Mig_S3_ID), unlist(Mig_S3_Date)))
 colnames(Mig_S3)<-c("person_id", "date")
 
+S3_result<-lookback_or_during_test(alg_data = Mig_S3, preg_data = my_PREG, lookback = my_lookback )
 # TIMING
 
 #AND/OR prophylaxis PRIOR but NOT DURING pregnancy
@@ -414,13 +367,13 @@ for(j in 1:length(my_MED_tables)){
 Mig_S3_pr<-as.data.frame(cbind(unlist(Mig_S3_pr_ID), unlist(Mig_S3_pr_Date)))
 colnames(Mig_S3_pr)<-c("person_id", "date")
 
-#TIMING test date<start of pregnancy
+S3_pr_result<-lookback_test(alg_data = Mig_S3_pr, preg_data = my_PREG, lookback = my_lookback)
 
-Mig_S3<-rbind(Mig_S3, Mig_S3_pr)
-
-Mig_S3$date<-as.Date(as.character(Mig_S3$date,format = "%Y%m%d"))
-Mig_S3_preg_dates<- my_PREG$pregnancy_end_date[Mig_S3$person_id%in%my_PREG$person_id]
-Mig_S3<- Mig_S3[(Mig_S3$date<Mig_S3_preg_dates)]
+# Mig_S3<-rbind(Mig_S3, Mig_S3_pr)
+# 
+# Mig_S3$date<-as.Date(as.character(Mig_S3$date,format = "%Y%m%d"))
+# Mig_S3_preg_dates<- my_PREG$pregnancy_end_date[Mig_S3$person_id%in%my_PREG$person_id]
+# Mig_S3<- Mig_S3[(Mig_S3$date<Mig_S3_preg_dates)]
 
 # Mig_S4 very severe:Mig_A7 AND one or more (N02CD%%, N02CX%%, C07A%%%, C09A%%%, C09C%%%, 
 #M03AX%%, N03A%%%, N06AA%%, N06AX16, N07CA03, N02CB%%, C08DA%%) DURING pregnancy
@@ -444,23 +397,18 @@ Mig_S4_Date<-unlist(Mig_S4_Date)
 Mig_S4<-as.data.frame(cbind(Mig_S4_ID, Mig_S4_Date))
 colnames(Mig_S4)<-c("person_id", "date")
 
-#need to extract the pregnancy start and end dates from the person_id that had been identified by the S4 algorithm.
-#WHAT IF THERE ARE MULTIPLE PREGNANCIES - LENGTH WON'T MATCH >_<
 
-Mig_S4$date<-as.Date(as.character(Mig_S4$date,format = "%Y%m%d"))
-Mig_S4_preg_start<- my_PREG$pregnancy_start_date[Mig_S4$person_id%in%my_PREG$person_id]
-Mig_S4_preg_end<- my_PREG$pregnancy_end_date[Mig_S4$person_id%in%my_PREG$person_id]
-Mig_S4<- Mig_S4[between(Mig_S4$date, Mig_S4_preg_start, Mig_S4_preg_end)]
+S4_result<-during_test(alg_data = Mig_S4, preg_data = my_PREG)
 
 ##############################################################
 # save outputs
 ##############################################################
 
-A_group<-list(Mig_A1, Mig_A2, Mig_A3)
+A_group<-list(A1_result, A2_result, A3_result)
 
-T_group<-list(Mig_T1, Mig_T2, Mig_T3, Mig_T4, Mig_T5, Mig_T6)
+T_group<-list(T1_result, T2_result, T3_result, T4_result, T5_result, T6_result)
 
-S_group<-list(Mig_S1, Mig_S2, Mig_S3, Mig_S4)
+S_group<-list(S1_result, S2_result, S3_result, S3_pr_result, S4_result)
 
 for (j in 1: length(A_group)){
   fwrite(A_group[j], paste0(output_alg, "/Mig_A", j,".csv"))
