@@ -21,8 +21,6 @@ source("99_path.R")
 
 source(paste0(pre_dir, "/packages.R"))
 
-# source(paste0(pre_dir, "/MIG_ALG.R"))
-
 source(paste0(pre_dir, "/pregnancy_filter.R"))
 
 source(paste0(pre_dir, "/lookback_function.R"))
