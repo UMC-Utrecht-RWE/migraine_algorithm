@@ -1,7 +1,7 @@
 #lookback test function
 
 lookback_test<-function(alg_data, preg_data, lookback=-365){
-  if(nrow(alg_data>0)){
+  if(nrow(alg_data)>0){
   # store total pregnacies
   total_preg<-nrow(preg_data)
   
@@ -61,7 +61,7 @@ lookback_test<-function(alg_data, preg_data, lookback=-365){
 #lookback test function
 
 lookback_or_during_test<-function(alg_data, preg_data, lookback=-365){
-  if(nrow(alg_data>0)){
+  if(nrow(alg_data)>0){
     # store total pregnacies
     total_preg<-nrow(preg_data)
     
@@ -129,7 +129,7 @@ lookback_or_during_test<-function(alg_data, preg_data, lookback=-365){
 
 
 during_test<-function(alg_data, preg_data){
-  if(nrow(alg_data>0)){
+  if(nrow(alg_data)>0){
     # store total pregnacies
     total_preg<-nrow(preg_data)
     

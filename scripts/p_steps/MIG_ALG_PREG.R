@@ -142,7 +142,7 @@ Mig_A7<-inner_join(Mig_A1 , Mig_A2)
 # Mig_T1 without aura ICD-10: G43.0; ICD-9: any(346.1, 346.7), RCD: F261
 
 
-Mig_T1_codes<-c("G43.0", "346.1","346.7", "F261")
+Mig_T1_codes<-c("G43.0","G430", "346.1","3461", "346.7","3467", "F261")
 
 Mig_T1_ID<-list()
 Mig_T1_Date<-list()
@@ -193,7 +193,7 @@ T2_result<-lookback_test(alg_data=Mig_T2, preg_data=my_PREG, lookback=my_lookbac
 
 #Mig_T3: migrainosus
 
-Mig_T3_codes<-c("G43.2", "346.12", "X007R")
+Mig_T3_codes<-c("G43.2", "G432","346.12","34612", "X007R")
 
 Mig_T3_ID<-list()
 Mig_T3_Date<-list()
@@ -215,7 +215,7 @@ T3_result<-lookback_test(alg_data=Mig_T3, preg_data=my_PREG, lookback=my_lookbac
 #Mig_T4: complicated
 # https://snomedbrowser.com/Codes/Details/193039006
 
-Mig_T4_codes<-c("G43.3", "F26y3")
+Mig_T4_codes<-c("G43.3", "G433","F26y3")
 
 Mig_T4_ID<-list()
 Mig_T4_Date<-list()
@@ -236,7 +236,7 @@ T4_result<-lookback_test(alg_data=Mig_T4, preg_data=my_PREG, lookback=my_lookbac
 
 #Mig_T5: other
 
-Mig_T5_codes<-c("G43.8", "346.8", "F262","Fyu53", "F26y", "X0070")
+Mig_T5_codes<-c("G43.8", "346.8", "G438", "3468", "F262","Fyu53", "F26y", "X0070")
 
 Mig_T5_ID<-list()
 Mig_T5_Date<-list()
@@ -260,7 +260,7 @@ T5_result<-lookback_test(alg_data=Mig_T5, preg_data=my_PREG, lookback=my_lookbac
 #Mig_T6: unspecified
 
 
-Mig_T6_codes<-c("G43.9", "346.9","346.2", "N89", "F26z")
+Mig_T6_codes<-c("G43.9", "346.9","346.2", "G439", "3469","3462","N89", "F26z")
 
 Mig_T6_ID<-list()
 Mig_T6_Date<-list()
