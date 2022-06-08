@@ -404,11 +404,18 @@ S4_result<-during_test(alg_data = Mig_S4, preg_data = my_PREG)
 # save outputs
 ##############################################################
 
-A_group<-list(A1_result, A2_result, A3_result)
+# A_group<-list(A1_result, A2_result, A3_result)
+# 
+# T_group<-list(T1_result, T2_result, T3_result, T4_result, T5_result, T6_result)
+# 
+# S_group<-list(S1_result, S2_result, S3_result, S3_pr_result, S4_result)
 
-T_group<-list(T1_result, T2_result, T3_result, T4_result, T5_result, T6_result)
+A_group<-list(Mig_A1, Mig_A2, Mig_A3, Mig_A4, Mig_A5, Mig_A6, Mig_A7)
 
-S_group<-list(S1_result, S2_result, S3_result, S3_pr_result, S4_result)
+T_group<-list(Mig_T1, Mig_T2, Mig_T3, Mig_T4, Mig_T5, Mig_T6)
+
+S_group<-list(Mig_S1, Mig_S2, Mig_S3, Mig_S3_pr, Mig_S4)
+
 
 for (j in 1: length(A_group)){
   fwrite(A_group[j], paste0(output_alg, "/Mig_A", j,".csv"))

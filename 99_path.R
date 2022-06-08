@@ -42,8 +42,14 @@ g_intermediate <- paste0(path_dir, "/g_intermediate")
 invisible(ifelse(!dir.exists(paste0(path_dir, "/g_output")), dir.create(paste0(path_dir, "/g_output")), FALSE))
 output_dir     <- paste0(path_dir, "/g_output")
 
-invisible(ifelse(!dir.exists(paste0(path_dir, "/g_output/mig_alg")), dir.create(paste0(path_dir, "/g_output/mig_alg")), FALSE))
-output_alg     <- paste0(path_dir, "/g_output/mig_alg")
+invisible(ifelse(!dir.exists(paste0(path_dir, "/g_output/mig_alg_A")), dir.create(paste0(path_dir, "/g_output/mig_alg_A")), FALSE))
+output_alg_A     <- paste0(path_dir, "/g_output/mig_alg_A")
+
+invisible(ifelse(!dir.exists(paste0(path_dir, "/g_output/mig_alg_T")), dir.create(paste0(path_dir, "/g_output/mig_alg_T")), FALSE))
+output_alg_T     <- paste0(path_dir, "/g_output/mig_alg_T")
+
+invisible(ifelse(!dir.exists(paste0(path_dir, "/g_output/mig_alg_S")), dir.create(paste0(path_dir, "/g_output/mig_alg_S")), FALSE))
+output_alg_S     <- paste0(path_dir, "/g_output/mig_alg_S")
 
 # Sets path to p_steps (to read codelists)
 pre_dir <- paste0(path_dir,"/p_steps")
