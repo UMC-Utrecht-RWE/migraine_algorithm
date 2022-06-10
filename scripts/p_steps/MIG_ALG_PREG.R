@@ -289,7 +289,7 @@ T6_result<-lookback_test(alg_data=Mig_T6, preg_data=my_PREG, lookback=my_lookbac
 #################################################
 
 #Mig_S1: mild: Mig_A1 positive AND one of the following ATC: "M01A%%%", "N02BE01", "N05AB04"
-
+#designating the SEVERITY per PATIENT- did they have Mig_A1 during lookback AND one of the following ATC: "M01A%%%", "N02BE01", "N05AB04" during lookback
 
 Mig_S1_codes<-c("M01A", "N02BE01", "N05AB04")
 
@@ -308,7 +308,10 @@ Mig_S1_Date<-unlist(Mig_S1_Date)
 Mig_S1<-as.data.frame(cbind(Mig_S1_ID, Mig_S1_Date))
 colnames(Mig_S1)<-c("person_id", "date")
 Mig_S1$date<-as.Date(Mig_S1$date, format = "%Y%m%d")
-#inner join with Mig_A1
+
+
+#inner join with Mig_A1 by person_id--> 2 date columns each needs to be checked for the lookback?
+
 Mig_S1<-inner_join(Mig_S1, Mig_A1, by="person_id")
 
 S1_result<-lookback_test(alg_data=Mig_S1, preg_data=my_PREG, lookback=my_lookback)
@@ -418,15 +421,15 @@ S_group<-list(Mig_S1, Mig_S2, Mig_S3, Mig_S3_pr, Mig_S4)
 
 
 for (j in 1: length(A_group)){
-  fwrite(A_group[j], paste0(output_alg, "/Mig_A", j,".csv"))
+  fwrite(A_group[j], paste0(output_alg_A, "/", j,".csv"))
 }
 
 for (j in 1: length(T_group)){
-  fwrite(T_group[j], paste0(output_alg, "/Mig_T", j,".csv"))
+  fwrite(T_group[j], paste0(output_alg_T, "/", j,".csv"))
 }
 
 for (j in 1: length(S_group)){
-  fwrite(S_group[j], paste0(output_alg, "/Mig_S", j,".csv"))
+  fwrite(S_group[j], paste0(output_alg_S, "/", j,".csv"))
 }
 
 
