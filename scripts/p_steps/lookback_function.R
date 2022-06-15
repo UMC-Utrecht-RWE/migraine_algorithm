@@ -1,43 +1,44 @@
 #lookback test function
 
-lookback_test<-function(alg_data, preg_data, lookback=-365){
-  if(nrow(alg_data)>0){
-  # store total pregnacies
-  total_preg<-nrow(preg_data)
+lookback_test<-function(expos_data, preg_data, lookback=-365){
+  if(nrow(expos_data)>0){
   
   # convert mig_dates to numeric
-  alg_data$num_date<-as.numeric(alg_data$date)
+  expos_data$num_date<-as.numeric(expos_data$date)
   #long to wide
-  alg_data<-dcast(setDT(alg_data), person_id ~ rowid(person_id), value.var = ("num_date"))
+  expos_data<-dcast(setDT(expos_data), person_id ~ rowid(person_id), value.var = ("num_date"))
   #order by person_id
-  alg_data <- alg_data[order(person_id),]  
+  expos_data <- expos_data[order(person_id),]  
   
   # extract pregnancies from same person_ids
-  alg_data_preg<- preg_data[preg_data$person_id%in%alg_data$person_id,]
+  expos_data_preg<- preg_data[preg_data$person_id%in%expos_data$person_id,]
   #select necessary columns
-  alg_data_preg<-alg_data_preg %>% select(c(pregnancy_id,person_id, pregnancy_start_date ))
+  expos_data_preg<-expos_data_preg %>% select(c(pregnancy_id,person_id, pregnancy_start_date ))
   # convert dates to numeric
-  alg_data_preg$num_preg_start<- as.numeric(alg_data_preg$pregnancy_start_date)
+  expos_data_preg$num_preg_start<- as.numeric(expos_data_preg$pregnancy_start_date)
   #long to wide
-  preg_start<-dcast(setDT(alg_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_start"))
+  preg_start<-dcast(setDT(expos_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_start"))
   preg_start <- preg_start[order(person_id),]
   
+  #test that person_id for exposure data and pregnancy data are the same
+  if((all(preg_start$person_id==expos_data$person_id))==T){print("person_ids match, OK")}else{print((preg_start$person_id==expos_data$person_id))}
   
   # for each pregnancy w/i eachperson compare each migraine date and each pregnancy date in a vectorized way...
   alg_diff_start<-list()
   
+  # loop only over the maximum number of pregnancies (maybe 5?) shouldn't be too slow
   
   for(i in 2:ncol(preg_start)){
     my_start_dates<-preg_start[,..i]
-    preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) alg_data[,2:ncol(alg_data)] - x ))
+    preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) expos_data[,2:ncol(expos_data)] - x ))
     alg_diff_start[[i-1]]<-preg_start_mig_diff
   }
   
   
-  # test the the alg_data date is within lookback
+  # test the the expos_data date is within lookback
   # store results, one row per person, one column for 1:max pregnancies
   
-  alg_result<-matrix(NA, nrow(alg_data), (ncol(preg_start)-1))
+  alg_result<-matrix(NA, nrow(expos_data), (ncol(preg_start)-1))
   
   for(i in 1:length(alg_diff_start)){
     #this first loop won't take long, it's just 1:max number of pregnancies
@@ -48,10 +49,12 @@ lookback_test<-function(alg_data, preg_data, lookback=-365){
         alg_result[j,i]<-1}else{alg_result[j,i]<-0}
     }
   }
-  alg_num<-sum(alg_result)
-  alg_perc<- alg_num/total_preg
-  my_results<-data.frame(cbind(alg_num, total_preg, alg_perc))
-  colnames(my_results)<-c("number migraine algorithm matches in lookback", "total pregnancies", "percentage of pregnancies with migraine")
+  my_results<-cbind(expos_data$person_id, as.data.frame(alg_result))
+  preg_num<-vector()
+  for(i in 1:ncol(alg_result)){
+    preg_num[i]<-paste0("pregnancy_",i)
+  }
+  colnames(my_results)<-c("person_id",preg_num )
   return(my_results)}
   else{print("no records in migraine algorithm dataframe")
     return("no patients matching this algorithm")}
@@ -60,32 +63,35 @@ lookback_test<-function(alg_data, preg_data, lookback=-365){
 
 #lookback test function
 
-lookback_or_during_test<-function(alg_data, preg_data, lookback=-365){
-  if(nrow(alg_data)>0){
-    # store total pregnacies
-    total_preg<-nrow(preg_data)
+lookback_or_during_test<-function(expos_data, preg_data, lookback=-365){
+  if(nrow(expos_data)>0){
     
     # convert mig_dates to numeric
-    alg_data$num_date<-as.numeric(alg_data$date)
+    expos_data$num_date<-as.numeric(expos_data$date)
     #long to wide
-    alg_data<-dcast(setDT(alg_data), person_id ~ rowid(person_id), value.var = ("num_date"))
+    expos_data<-dcast(setDT(expos_data), person_id ~ rowid(person_id), value.var = ("num_date"))
     #order by person_id
-    alg_data <- alg_data[order(person_id),]  
+    expos_data <- expos_data[order(person_id),]  
     
     # extract pregnancies from same person_ids
-    alg_data_preg<- preg_data[preg_data$person_id%in%alg_data$person_id,]
+    expos_data_preg<- preg_data[preg_data$person_id%in%expos_data$person_id,]
     #select necessary columns
-    alg_data_preg<-alg_data_preg %>% select(c(pregnancy_id,person_id, pregnancy_start_date, pregnancy_end_date ))
+    expos_data_preg<-expos_data_preg %>% select(c(pregnancy_id,person_id, pregnancy_start_date, pregnancy_end_date ))
     # convert dates to numeric
-    alg_data_preg$num_preg_start<- as.numeric(alg_data_preg$pregnancy_start_date)
-    alg_data_preg$num_preg_end<- as.numeric(alg_data_preg$pregnancy_end_date)
+    expos_data_preg$num_preg_start<- as.numeric(expos_data_preg$pregnancy_start_date)
+    expos_data_preg$num_preg_end<- as.numeric(expos_data_preg$pregnancy_end_date)
     #long to wide
-    preg_start<-dcast(setDT(alg_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_start"))
+    preg_start<-dcast(setDT(expos_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_start"))
     preg_start <- preg_start[order(person_id),]
     
-    preg_end<-dcast(setDT(alg_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_end"))
+    preg_end<-dcast(setDT(expos_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_end"))
     preg_end <- preg_end[order(person_id),]
     
+    #test that person_id for exposure data and pregnancy data are the same
+    if((all(preg_start$person_id==expos_data$person_id))==T){print("person_ids match start, OK")}else{print((preg_start$person_id==expos_data$person_id))}
+    
+    #test that person_id for exposure data and pregnancy data are the same
+    if((all(preg_end$person_id==expos_data$person_id))==T){print("person_ids match end, OK")}else{print((preg_start$person_id==expos_data$person_id))}
     
     # for each pregnancy w/i eachperson compare each migraine date and each pregnancy date in a vectorized way...
     alg_diff_start<-list()
@@ -93,19 +99,19 @@ lookback_or_during_test<-function(alg_data, preg_data, lookback=-365){
     
     for(i in 2:ncol(preg_start)){
       my_start_dates<-preg_start[,..i]
-      preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) alg_data[,2:ncol(alg_data)] - x ))
+      preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) expos_data[,2:ncol(expos_data)] - x ))
       alg_diff_start[[i-1]]<-preg_start_mig_diff
       
       my_end_dates<-preg_end[,..i]
-      preg_end_mig_diff <- as.data.frame(apply(my_end_dates,2,function(x) alg_data[,2:ncol(alg_data)] - x ))
+      preg_end_mig_diff <- as.data.frame(apply(my_end_dates,2,function(x) expos_data[,2:ncol(expos_data)] - x ))
       alg_diff_end[[i-1]]<-preg_end_mig_diff
     }
     
     
-    # test the the alg_data date is within lookback
+    # test the the expos_data date is within lookback
     # store results, one row per person, one column for 1:max pregnancies
     
-    alg_result<-matrix(NA, nrow(alg_data), (ncol(preg_start)-1))
+    alg_result<-matrix(NA, nrow(expos_data), (ncol(preg_start)-1))
     
     for(i in 1:length(alg_diff_start)){
       #this first loop won't take long, it's just 1:max number of pregnancies
@@ -117,10 +123,12 @@ lookback_or_during_test<-function(alg_data, preg_data, lookback=-365){
           alg_result[j,i]<-1}else{alg_result[j,i]<-0}
       }
     }
-    alg_num<-sum(alg_result)
-    alg_perc<- alg_num/total_preg
-    my_results<-data.frame(cbind(alg_num, total_preg, alg_perc))
-    colnames(my_results)<-c("number migraine algorithm matches in lookback", "total pregnancies", "percentage of pregnancies with migraine")
+    my_results<-cbind(expos_data$person_id, as.data.frame(alg_result))
+    preg_num<-vector()
+    for(i in 1:ncol(alg_result)){
+      preg_num[i]<-paste0("pregnancy_",i)
+    }
+    colnames(my_results)<-c("person_id",preg_num )
     return(my_results)}
   else{print("no records in migraine algorithm dataframe")
     return("no patients matching this algorithm")}
@@ -128,31 +136,36 @@ lookback_or_during_test<-function(alg_data, preg_data, lookback=-365){
 
 
 
-during_test<-function(alg_data, preg_data){
-  if(nrow(alg_data)>0){
-    # store total pregnacies
-    total_preg<-nrow(preg_data)
+during_test<-function(expos_data, preg_data){
+  if(nrow(expos_data)>0){
+    
     
     # convert mig_dates to numeric
-    alg_data$num_date<-as.numeric(alg_data$date)
+    expos_data$num_date<-as.numeric(expos_data$date)
     #long to wide
-    alg_data<-dcast(setDT(alg_data), person_id ~ rowid(person_id), value.var = ("num_date"))
+    expos_data<-dcast(setDT(expos_data), person_id ~ rowid(person_id), value.var = ("num_date"))
     #order by person_id
-    alg_data <- alg_data[order(person_id),]  
+    expos_data <- expos_data[order(person_id),]  
     
     # extract pregnancies from same person_ids
-    alg_data_preg<- preg_data[preg_data$person_id%in%alg_data$person_id,]
+    expos_data_preg<- preg_data[preg_data$person_id%in%expos_data$person_id,]
     #select necessary columns
-    alg_data_preg<-alg_data_preg %>% select(c(pregnancy_id,person_id, pregnancy_start_date, pregnancy_end_date ))
+    expos_data_preg<-expos_data_preg %>% select(c(pregnancy_id,person_id, pregnancy_start_date, pregnancy_end_date ))
     # convert dates to numeric
-    alg_data_preg$num_preg_start<- as.numeric(alg_data_preg$pregnancy_start_date)
-    alg_data_preg$num_preg_end<- as.numeric(alg_data_preg$pregnancy_end_date)
+    expos_data_preg$num_preg_start<- as.numeric(expos_data_preg$pregnancy_start_date)
+    expos_data_preg$num_preg_end<- as.numeric(expos_data_preg$pregnancy_end_date)
     #long to wide
-    preg_start<-dcast(setDT(alg_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_start"))
+    preg_start<-dcast(setDT(expos_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_start"))
     preg_start <- preg_start[order(person_id),]
     
-    preg_end<-dcast(setDT(alg_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_end"))
+    preg_end<-dcast(setDT(expos_data_preg), person_id ~ rowid(person_id), value.var = ("num_preg_end"))
     preg_end <- preg_end[order(person_id),]
+    
+    #test that person_id for exposure data and pregnancy data are the same
+    if((all(preg_start$person_id==expos_data$person_id))==T){print("person_ids match start, OK")}else{print((preg_start$person_id==expos_data$person_id))}
+    
+    #test that person_id for exposure data and pregnancy data are the same
+    if((all(preg_end$person_id==expos_data$person_id))==T){print("person_ids match end, OK")}else{print((preg_start$person_id==expos_data$person_id))}
     
     
     # for each pregnancy w/i eachperson compare each migraine date and each pregnancy date in a vectorized way...
@@ -161,19 +174,19 @@ during_test<-function(alg_data, preg_data){
     
     for(i in 2:ncol(preg_start)){
       my_start_dates<-preg_start[,..i]
-      preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) alg_data[,2:ncol(alg_data)] - x ))
+      preg_start_mig_diff <- as.data.frame(apply(my_start_dates,2,function(x) expos_data[,2:ncol(expos_data)] - x ))
       alg_diff_start[[i-1]]<-preg_start_mig_diff
       
       my_end_dates<-preg_end[,..i]
-      preg_end_mig_diff <- as.data.frame(apply(my_end_dates,2,function(x) alg_data[,2:ncol(alg_data)] - x ))
+      preg_end_mig_diff <- as.data.frame(apply(my_end_dates,2,function(x) expos_data[,2:ncol(expos_data)] - x ))
       alg_diff_end[[i-1]]<-preg_end_mig_diff
     }
     
     
-    # test the the alg_data date is within lookback
+    # test the the expos_data date is within lookback
     # store results, one row per person, one column for 1:max pregnancies
     
-    alg_result<-matrix(NA, nrow(alg_data), (ncol(preg_start)-1))
+    alg_result<-matrix(NA, nrow(expos_data), (ncol(preg_start)-1))
     
     for(i in 1:length(alg_diff_start)){
       #this first loop won't take long, it's just 1:max number of pregnancies
@@ -185,10 +198,12 @@ during_test<-function(alg_data, preg_data){
           alg_result[j,i]<-1}else{alg_result[j,i]<-0}
       }
     }
-    alg_num<-sum(alg_result)
-    alg_perc<- alg_num/total_preg
-    my_results<-data.frame(cbind(alg_num, total_preg, alg_perc))
-    colnames(my_results)<-c("number migraine algorithm matches in lookback", "total pregnancies", "percentage of pregnancies with migraine")
+    my_results<-cbind(expos_data$person_id, as.data.frame(alg_result))
+    preg_num<-vector()
+    for(i in 1:ncol(alg_result)){
+      preg_num[i]<-paste0("pregnancy_",i)
+    }
+    colnames(my_results)<-c("person_id",preg_num )
     return(my_results)}
   else{print("no records in migraine algorithm dataframe")
     return("no patients matching this algorithm")}

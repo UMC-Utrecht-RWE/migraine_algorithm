@@ -7,17 +7,8 @@
 # This script will detect migraine, migraine type and migraine severity using 
 # several algorithms, with hierarchical sensitivity and specificity
 
-#migraine is also categorized based on timing relative to pregnancy
-#--> each person can have more than one diagnosis (MANY) and/or pregnancy (seeing around 5 or 6), this will be a coding challenge
 
-#--> make data long--> wide check columns
-
-
-# parameters: looking for migraine in pregnancy
-
-my_lookback<- -365
-
-my_path<-path_CDM
+my_path<-preg_folder
 
 my_MED_tables<-list.files(path=my_path, pattern = "MEDICINES_")
 my_PROC_tables<-list.files(path=my_path, pattern = "PROCEDURES_")
@@ -235,8 +226,6 @@ Mig_T4<-as.data.frame(cbind(Mig_T4_ID, Mig_T4_Date))
 colnames(Mig_T4)<-c("person_id", "date")
 Mig_T4$date<-as.Date(Mig_T4$date, format = "%Y%m%d")
 
-T4_result<-lookback_test(alg_data=Mig_T4, preg_data=my_PREG, lookback=my_lookback)
-
 #Mig_T5: other
 
 Mig_T5_codes<-c("G43.8", "346.8", "G438", "3468", "F262","Fyu53", "F26y", "X0070")
@@ -310,11 +299,9 @@ Mig_S1<-as.data.frame(cbind(Mig_S1_ID, Mig_S1_Date))
 colnames(Mig_S1)<-c("person_id", "date")
 Mig_S1$date<-as.Date(Mig_S1$date, format = "%Y%m%d")
 
-
-#inner join with Mig_A1 by person_id--> 2 date columns each needs to be checked for the lookback?
 # 14/6 Angela: yes, both need to be within lookback, but order doesn't matter
+#S1 result is a compound of A1 and S1, both need to be positive within lookback
 
-Mig_S1<-inner_join(Mig_S1, Mig_A1, by="person_id")
 
 
 # #Mig_S2: modify: Mig_A2 PRIOR to (within lookback), AND/OR DURING pregnancy 
@@ -415,15 +402,15 @@ S_group<-list(Mig_S1, Mig_S2, Mig_S3, Mig_S3_pr, Mig_S4)
 
 
 for (j in 1: length(A_group)){
-  fwrite(A_group[j], paste0(output_alg_A, "/", j,".csv"))
+  fwrite(A_group[j], paste0(output_alg_A, "/", "Mig_A",j,".csv"))
 }
 
 for (j in 1: length(T_group)){
-  fwrite(T_group[j], paste0(output_alg_T, "/", j,".csv"))
+  fwrite(T_group[j], paste0(output_alg_T, "/", "Mig_T",j,".csv"))
 }
 
 for (j in 1: length(S_group)){
-  fwrite(S_group[j], paste0(output_alg_S, "/", j,".csv"))
+  fwrite(S_group[j], paste0(output_alg_S, "/","Mig_S", j,".csv"))
 }
 
 
