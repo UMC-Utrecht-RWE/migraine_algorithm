@@ -17,7 +17,7 @@
 
 my_lookback<- -365
 
-my_path<-preg_folder
+my_path<-path_CDM
 
 my_MED_tables<-list.files(path=my_path, pattern = "MEDICINES_")
 my_PROC_tables<-list.files(path=my_path, pattern = "PROCEDURES_")
@@ -43,25 +43,24 @@ Mig_A1_codes<-c("G43", "346", "F26","N89")
 
 Mig_A1_ID<-list()
 Mig_A1_Date<-list()
+Mig_A1_ATC<-list()
 
 
-for(j in 1:length(my_EVENT_tables)){
-  my_dt_EV<-fread(paste0(my_path, my_EVENT_tables[j]))
-  Mig_A1_ID[j]<-list(my_dt_EV$person_id[Reduce(`|`, lapply(Mig_A1_codes, startsWith, x = as.character(my_dt_EV$event_code)))])
-  Mig_A1_Date[j]<-list(my_dt_EV$start_date_record[Reduce(`|`, lapply(Mig_A1_codes, startsWith, x = as.character(my_dt_EV$event_code)))])
+for(j in 1:length(my_MED_tables)){
+  my_dt_MED<-fread(paste0(my_path, my_MED_tables[j]))
+  my_rows<-which(Reduce(`|`, lapply(Mig_A1_codes, startsWith, x = as.character(my_dt_MED$medicinal_product_atc_code))))
+  Mig_A1_ID[j]<-list(my_dt_MED$person_id[my_rows])
+  Mig_A1_Date[j]<- list(my_dt_MED$date_dispensing[my_rows])
+  Mig_A1_ATC[j]<-list(my_dt_MED$medicinal_product_atc_code[my_rows])
 }
 
 
 Mig_A1_ID<-unlist(Mig_A1_ID)
 Mig_A1_Date<-unlist(Mig_A1_Date)
-Mig_A1<-as.data.frame(cbind(Mig_A1_ID, Mig_A1_Date))
-
-colnames(Mig_A1)<-c("person_id", "date")
-Mig_A1$date<-as.Date(Mig_A1$date, format = "%Y%m%d")
-
-
-#test that date of migraine signal is within lookback window
-A1_result<-lookback_test(alg_data=Mig_A1, preg_data=my_PREG, lookback=my_lookback)
+Mig_A1_ATC<-unlist(Mig_A1_ATC)
+Mig_A1<-as.data.frame(cbind(Mig_A1_ID,Mig_A1_Date, Mig_A1_ATC))
+colnames(Mig_A1)<-c("person_id", "date", "ATC")
+Mig_A1$date<-as.Date(Mig_A1_df$date, format = "%Y%m%d")
 
 
 ###########################################################################################################
@@ -71,20 +70,21 @@ A1_result<-lookback_test(alg_data=Mig_A1, preg_data=my_PREG, lookback=my_lookbac
 
 Mig_A2_ID<-list()
 Mig_A2_Date<-list()
+Mig_A2_ATC<-list()
 
 for (j in 1:length(my_MED_tables)){
   my_dt_MED<-fread(paste0(my_path, my_MED_tables[j]))
-Mig_A2_ID[[j]] <- my_dt_MED$person_id[startsWith(my_dt_MED$medicinal_product_atc_code,"N02CC")]
-Mig_A2_Date[[j]] <- my_dt_MED$date_dispensing [startsWith(my_dt_MED$medicinal_product_atc_code,"N02CC")]
+  my_rows<-which(Reduce(`|`, lapply("N02CC", startsWith, x = as.character(my_dt_MED$medicinal_product_atc_code))))
+  Mig_A2_ID[j]<-list(my_dt_MED$person_id[my_rows])
+  Mig_A2_Date[j]<- list(my_dt_MED$date_dispensing[my_rows])
+  Mig_A2_ATC[j]<-list(my_dt_MED$medicinal_product_atc_code[my_rows])
 }
 
-Mig_A2<-as.data.frame(cbind(unlist(Mig_A2_ID), unlist(Mig_A2_Date)))
+Mig_A2<-as.data.frame(cbind(unlist(Mig_A2_ID), unlist(Mig_A2_Date), unlist(Mig_A2_ATC)))
 
-colnames(Mig_A2)<-c("person_id", "date")
+colnames(Mig_A2)<-c("person_id", "date", "ATC")
+
 Mig_A2$date<-as.Date(Mig_A2$date, format = "%Y%m%d")
-
-#test that date of migraine signal is within lookback window
-A2_result<-lookback_test(alg_data=Mig_A2, preg_data=my_PREG, lookback=my_lookback)
 
 
 ################################################################################
@@ -92,46 +92,54 @@ A2_result<-lookback_test(alg_data=Mig_A2, preg_data=my_PREG, lookback=my_lookbac
 #Mig_A3: migraine procedure ATC: M03AX01
 if(length(my_PROC_tables>0)){
   
-Mig_A3_ID<-list()
-Mig_A3_Date<-list()
+Mig_A3_proc_ID<-list()
+Mig_A3_proc_Date<-list()
+Mig_A3_proc_ATC<-list()
+
+Mig_A3_med_ID<-list()
+Mig_A3_med_Date<-list()
+Mig_A3_med_ATC<-list()
 
 for (j in 1:length(my_PROC_tables)){
   my_dt_PROC<-fread(paste0(my_path, my_PROC_tables[j]))
-Mig_A3_ID[[j]]<- my_dt_PROC$person_id[my_dt_PROC$procedure_code=="M03AX01"]
-Mig_A3_Date[[j]] <- my_dt_PROC$procedure_date[my_dt_MED$medicinal_product_atc_code=="M03AX01"]
+  my_rows<-which(Reduce(`|`, lapply("M03AX01", startsWith, x = as.character(my_dt_PROC$procedure_code))))
+  Mig_A3_proc_ID[j]<-list(my_dt_PROC$person_id[my_rows])
+  Mig_A3_proc_Date[j]<- list(my_dt_PROC$procedure_date[my_rows])
+  Mig_A3_proc_ATC[j]<-list(my_dt_PROC$procedure_code[my_rows])
+  
+  my_dt_MED<-fread(paste0(my_path, my_MED_tables[j]))
+  my_rows<-which(Reduce(`|`, lapply("M03AX01", startsWith, x = as.character(my_dt_MED$medicinal_product_atc_code))))
+  Mig_A3_med_ID[j]<-list(my_dt_MED$person_id[my_rows])
+  Mig_A3_med_Date[j]<- list(my_dt_MED$date_dispensing[my_rows])
+  Mig_A3_med_ATC[j]<-list(my_dt_MED$medicinal_product_atc_code[my_rows])
 }
 
-Mig_A3<-as.data.frame(cbind(unlist(Mig_A3_ID), unlist(Mig_A3_Date)))
-colnames(Mig_A3)<-c("person_id", "date")} else{print("No PROCEDURES table for Mig_A3")
-  Mig_A3<-data.frame(person_id=character(), date=numeric())}
+Mig_A3_ID<-c(unlist(Mig_A3_proc_ID), unlist(Mig_A3_med_ID))
+Mig_A3_Date<-c(unlist(Mig_A3_proc_Date), unlist(Mig_A3_med_Date))
+Mig_A3_ATC<-c(unlist(Mig_A3_proc_ATC), unlist(Mig_A3_med_ATC))
 
-Mig_A3$date<-as.Date(Mig_A3$date, format = "%Y%m%d")
+Mig_A3<-as.data.frame(cbind((Mig_A3_ID), (Mig_A3_Date), (Mig_A3_ATC)))
+colnames(Mig_A3)<-c("person_id", "date", "ATC")
 
-A3_result<-lookback_test(alg_data=Mig_A3, preg_data=my_PREG, lookback=my_lookback)
+Mig_A3$date<-as.Date(Mig_A3$date, format = "%Y%m%d")}else{print("no procedures table present")}
 
 #Mig_A4: MigA1 AND/OR MigA2
-Mig_A4<-as.data.frame(inner_join(Mig_A1, Mig_A2))
-A4_result<-lookback_test(alg_data=Mig_A4, preg_data=my_PREG, lookback=my_lookback)
+
+#help hedwig, for lookback, which date to use? 
+
+Mig_A4<-as.data.frame(rbind(Mig_A1, Mig_A2))
 
 #Mig_A5: MigA1 AND/OR Mig_A3
 
-
-Mig_A5<-inner_join(Mig_A1 , Mig_A3)
-A5_result<-lookback_test(alg_data=Mig_A5, preg_data=my_PREG, lookback=my_lookback)
+Mig_A5<-as.data.frame(rbind(Mig_A1 , Mig_A3))
 
 #Mig_A6: MigA2 AND/OR MigA3
 
-Mig_A6<-inner_join(Mig_A2, Mig_A3)
-A6_result<-lookback_test(alg_data=Mig_A6, preg_data=my_PREG, lookback=my_lookback)
+Mig_A6<-as.data.frame(rbind(Mig_A2, Mig_A3))
 
 #Mig_A7: MigA1 AND/OR MigA2 AND/OR Mig_A3
 
-#needs 2 steps because of multiple joins
-Mig_A7<-inner_join(Mig_A1 , Mig_A2)
-
-  #second join
-  Mig_A7<-inner_join(Mig_A7, Mig_A3)
-  A7_result<-lookback_test(alg_data=Mig_A7, preg_data=my_PREG, lookback=my_lookback)
+Mig_A7<-rbind(Mig_A1 , Mig_A2, Mig_A3)
 
 #################################################
 #
@@ -146,27 +154,25 @@ Mig_T1_codes<-c("G43.0","G430", "346.1","3461", "346.7","3467", "F261")
 
 Mig_T1_ID<-list()
 Mig_T1_Date<-list()
+Mig_T1_ATC<-list()
 
 
 for(j in 1:length(my_EVENT_tables)){
   my_dt_EV<-fread(paste0(my_path, my_EVENT_tables[j]))
-  Mig_T1_ID[j]<-list(my_dt_EV$person_id[Reduce(`|`, lapply(Mig_T1_codes, startsWith, x = as.character(my_dt_EV$event_code)))])
-  Mig_T1_Date[j]<-list(my_dt_EV$start_date_record[Reduce(`|`, lapply(Mig_T1_codes, startsWith, x = as.character(my_dt_EV$event_code)))])
+  my_rows<-which(Reduce(`|`, lapply(Mig_T1_codes, startsWith, x = as.character(my_dt_EV$event_code))))
+  Mig_T1_ID[j]<-list(my_dt_EV$person_id[my_rows])
+  Mig_T1_Date[j]<- list(my_dt_EV$start_date_record[my_rows])
+  Mig_T1_ATC[j]<-list(my_dt_MED$event_code[my_rows])
 }
 
 
 Mig_T1_ID<-unlist(Mig_T1_ID)
 Mig_T1_Date<-unlist(Mig_T1_Date)
-Mig_T1<-as.data.frame(cbind(Mig_T1_ID, Mig_T1_Date))
-colnames(Mig_T1)<-c("person_id", "date")
+Mig_T1_ATC<-unlist(Mig_T1_ATC)
+Mig_T1<-as.data.frame(cbind(Mig_T1_ID, Mig_T1_Date, Mig_T1_ATC))
+colnames(Mig_T1)<-c("person_id", "date", "code")
 
-Mig_T1_ID<-unlist(Mig_T1_ID)
-Mig_T1_Date<-unlist(Mig_T1_Date)
-Mig_T1<-as.data.frame(cbind(Mig_T1_ID, Mig_T1_Date))
-colnames(Mig_T1)<-c("person_id", "date")
 Mig_T1$date<-as.Date(Mig_T1$date, format = "%Y%m%d")
-
-T1_result<-lookback_test(alg_data=Mig_T1, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_T2: with aura: "G43.1", "346.0", "346.5" , "346.6", "F260"
 
@@ -189,8 +195,6 @@ Mig_T2<-as.data.frame(cbind(Mig_T2_ID, Mig_T2_Date))
 colnames(Mig_T2)<-c("person_id", "date")
 Mig_T2$date<-as.Date(Mig_T2$date, format = "%Y%m%d")
 
-T2_result<-lookback_test(alg_data=Mig_T2, preg_data=my_PREG, lookback=my_lookback)
-
 #Mig_T3: migrainosus
 
 Mig_T3_codes<-c("G43.2", "G432","346.12","34612", "X007R")
@@ -210,7 +214,6 @@ Mig_T3<-as.data.frame(cbind(Mig_T3_ID, Mig_T3_Date))
 colnames(Mig_T3)<-c("person_id", "date")
 Mig_T3$date<-as.Date(Mig_T3$date, format = "%Y%m%d")
 
-T3_result<-lookback_test(alg_data=Mig_T3, preg_data=my_PREG, lookback=my_lookback)
 
 #Mig_T4: complicated
 # https://snomedbrowser.com/Codes/Details/193039006
@@ -279,8 +282,6 @@ Mig_T6<-as.data.frame(cbind(Mig_T6_ID, Mig_T6_Date))
 colnames(Mig_T6)<-c("person_id", "date")
 Mig_T6$date<-as.Date(Mig_T6$date, format = "%Y%m%d")
 
-T6_result<-lookback_test(alg_data=Mig_T6, preg_data=my_PREG, lookback=my_lookback)
-
 #################################################
 #
 # third group (S): severity of migraine (mild, moderate, severe, very severe)
@@ -311,10 +312,10 @@ Mig_S1$date<-as.Date(Mig_S1$date, format = "%Y%m%d")
 
 
 #inner join with Mig_A1 by person_id--> 2 date columns each needs to be checked for the lookback?
+# 14/6 Angela: yes, both need to be within lookback, but order doesn't matter
 
 Mig_S1<-inner_join(Mig_S1, Mig_A1, by="person_id")
 
-S1_result<-lookback_test(alg_data=Mig_S1, preg_data=my_PREG, lookback=my_lookback)
 
 # #Mig_S2: modify: Mig_A2 PRIOR to (within lookback), AND/OR DURING pregnancy 
 # ##question for Hedvig: at anytime prior to pregnancy (a year before? 3 months?)
@@ -324,9 +325,9 @@ S1_result<-lookback_test(alg_data=Mig_S1, preg_data=my_PREG, lookback=my_lookbac
 
 
 # make copy of A2 for timing tests
+# Mig_A2 (prior to, and/or during pregnancy), excluding N02CC01 injection 
 
-
-Mig_S2<-Mig_A2
+Mig_S2<-Mig_A2[Mig_A2$ATC!="N02CC01",]
 
 S2_result<-lookback_or_during_test(alg_data = Mig_S2, preg_data = my_PREG, lookback = my_lookback )
 
@@ -336,7 +337,7 @@ S2_result<-lookback_or_during_test(alg_data = Mig_S2, preg_data = my_PREG, lookb
 #AND/OR prophylaxis PRIOR but NOT DURING pregnancy 
 # table 5 drug utilization SAP
 
-#split into 2 sections
+#split into 2 sections then collate matches
 
 Mig_S3_ID<-list()
 Mig_S3_Date<-list()
@@ -350,7 +351,7 @@ for (j in 1:length(my_MED_tables)){
 Mig_S3<-as.data.frame(cbind(unlist(Mig_S3_ID), unlist(Mig_S3_Date)))
 colnames(Mig_S3)<-c("person_id", "date")
 
-S3_result<-lookback_or_during_test(alg_data = Mig_S3, preg_data = my_PREG, lookback = my_lookback )
+
 # TIMING
 
 #AND/OR prophylaxis PRIOR but NOT DURING pregnancy
@@ -370,7 +371,7 @@ for(j in 1:length(my_MED_tables)){
 Mig_S3_pr<-as.data.frame(cbind(unlist(Mig_S3_pr_ID), unlist(Mig_S3_pr_Date)))
 colnames(Mig_S3_pr)<-c("person_id", "date")
 
-S3_pr_result<-lookback_test(alg_data = Mig_S3_pr, preg_data = my_PREG, lookback = my_lookback)
+
 
 # Mig_S3<-rbind(Mig_S3, Mig_S3_pr)
 # 
@@ -401,17 +402,10 @@ Mig_S4<-as.data.frame(cbind(Mig_S4_ID, Mig_S4_Date))
 colnames(Mig_S4)<-c("person_id", "date")
 
 
-S4_result<-during_test(alg_data = Mig_S4, preg_data = my_PREG)
 
 ##############################################################
 # save outputs
 ##############################################################
-
-# A_group<-list(A1_result, A2_result, A3_result)
-# 
-# T_group<-list(T1_result, T2_result, T3_result, T4_result, T5_result, T6_result)
-# 
-# S_group<-list(S1_result, S2_result, S3_result, S3_pr_result, S4_result)
 
 A_group<-list(Mig_A1, Mig_A2, Mig_A3, Mig_A4, Mig_A5, Mig_A6, Mig_A7)
 

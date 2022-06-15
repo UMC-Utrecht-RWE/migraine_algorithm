@@ -117,6 +117,6 @@ Mig_A7<-inner_join(Mig_A1 , Mig_A2)
 A_group<-list(Mig_A1, Mig_A2, Mig_A3, Mig_A4, Mig_A5, Mig_A6, Mig_A7)
 
 for (j in 1: length(A_group)){
-  fwrite(A_group[j], paste0(output_alg_A, "/", j,".csv"))
+  fwrite(A_group[j], paste0(output_alg_A, "/mig_A", j,".csv"))
 }
 

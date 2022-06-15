@@ -22,6 +22,7 @@ actual_tables_preselect$VACCINES<-list.files(paste0(preselect_folder,"/"), patte
 actual_tables_preselect$SURVEY_ID<-list.files(paste0(preselect_folder,"/"), pattern="^SURVEY_ID")
 actual_tables_preselect$EUROCAT<-list.files(paste0(preselect_folder,"/"), pattern="^EUROCAT")
 actual_tables_preselect$PERSONS<-list.files(paste0(preselect_folder,"/"), pattern="^PERSONS")
+actual_tables_preselect$PROCEDURES<-list.files(paste0(preselect_folder,"/"), pattern="^PROCEDURES")
 
 all_actual_tables<-list.files(paste0(preselect_folder,"/"), pattern = "\\.csv$")
 table_list<-unlist(actual_tables_preselect)
