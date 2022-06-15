@@ -51,7 +51,7 @@ Mig_A1_Date<-unlist(Mig_A1_Date)
 Mig_A1_ATC<-unlist(Mig_A1_ATC)
 Mig_A1<-as.data.frame(cbind(Mig_A1_ID,Mig_A1_Date, Mig_A1_ATC))
 colnames(Mig_A1)<-c("person_id", "date", "ATC")
-Mig_A1$date<-as.Date(Mig_A1_df$date, format = "%Y%m%d")
+Mig_A1$date<-as.Date(Mig_A1$date, format = "%Y%m%d")
 
 
 ###########################################################################################################
@@ -112,7 +112,7 @@ Mig_A3_ATC<-c(unlist(Mig_A3_proc_ATC), unlist(Mig_A3_med_ATC))
 Mig_A3<-as.data.frame(cbind((Mig_A3_ID), (Mig_A3_Date), (Mig_A3_ATC)))
 colnames(Mig_A3)<-c("person_id", "date", "ATC")
 
-Mig_A3$date<-as.Date(Mig_A3$date, format = "%Y%m%d")}else{print("no procedures table present")}
+Mig_A3$date<-as.Date(Mig_A3$date, format = "%Y%m%d")}else{Mig_S3<-("no procedures table present")}
 
 #Mig_A4: MigA1 AND/OR MigA2
 
@@ -247,8 +247,6 @@ Mig_T5<-as.data.frame(cbind(Mig_T5_ID, Mig_T5_Date))
 colnames(Mig_T5)<-c("person_id", "date")
 Mig_T5$date<-as.Date(Mig_T5$date, format = "%Y%m%d")
 
-T5_result<-lookback_test(alg_data=Mig_T5, preg_data=my_PREG, lookback=my_lookback)
-
 #Mig_T6: unspecified
 
 
@@ -316,7 +314,6 @@ Mig_S1$date<-as.Date(Mig_S1$date, format = "%Y%m%d")
 
 Mig_S2<-Mig_A2[Mig_A2$ATC!="N02CC01",]
 
-S2_result<-lookback_or_during_test(alg_data = Mig_S2, preg_data = my_PREG, lookback = my_lookback )
 
 ################################################################################
 

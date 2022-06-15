@@ -27,4 +27,12 @@ source(paste0(pre_dir, "/lookback_function.R"))
 
 source(paste0(pre_dir, "/MIG_ALG_PREG.R"))
 
+lookback_windows<-c((-365*5), (-365),(-153))
+
+for(i in 1:length(lookback_windows)){
+my_lookback<-lookback_windows[i]
+source(paste0(pre_dir, "/lookback_migraine.R"))
+}
+
+
 
