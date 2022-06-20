@@ -37,12 +37,12 @@ Mig_A1_Date<-list()
 Mig_A1_ATC<-list()
 
 
-for(j in 1:length(my_MED_tables)){
-  my_dt_MED<-fread(paste0(my_path, my_MED_tables[j]))
-  my_rows<-which(Reduce(`|`, lapply(Mig_A1_codes, startsWith, x = as.character(my_dt_MED$medicinal_product_atc_code))))
-  Mig_A1_ID[j]<-list(my_dt_MED$person_id[my_rows])
-  Mig_A1_Date[j]<- list(my_dt_MED$date_dispensing[my_rows])
-  Mig_A1_ATC[j]<-list(my_dt_MED$medicinal_product_atc_code[my_rows])
+for(j in 1:length(my_EVENT_tables)){
+  my_dt_EV<-fread(paste0(my_path, my_EVENT_tables[j]))
+  my_rows<-which(Reduce(`|`, lapply(Mig_A1_codes, startsWith, x = as.character(my_dt_EV$event_code))))
+  Mig_A1_ID[j]<-list(my_dt_EV$person_id[my_rows])
+  Mig_A1_Date[j]<- list(my_dt_EV$start_date_record[my_rows])
+  Mig_A1_ATC[j]<-list(my_dt_EV$event_code[my_rows])
 }
 
 
