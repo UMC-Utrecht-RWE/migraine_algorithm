@@ -45,7 +45,7 @@ lookback_test<-function(expos_data, preg_data, lookback=-365){
     results_start<-alg_diff_start[[i]]
     for (j in 1:nrow(results_start)){
       #this loop is row by row, but only needs to be run once
-      if((any(results_start[j,]<=0 & results_start[j,]>=my_lookback, na.rm=T))==T){
+      if((any(results_start[j,]<=-1 & results_start[j,]>=my_lookback, na.rm=T))==T){
         alg_result[j,i]<-1}else{alg_result[j,i]<-0}
     }
   }
